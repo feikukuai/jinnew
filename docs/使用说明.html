@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江湖金手指 · 交付包使用说明</title>
+<style>
+  :root{
+    --bg:#0f1115; --card:#171a21; --card2:#1d222b; --line:#2a3040;
+    --fg:#e8ecf3; --muted:#9aa4b6; --pri:#e0a44a; --pri2:#f2c479;
+    --ok:#4ec9a0; --warn:#e06c6c; --code:#0b0d11;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.75;font-size:15px}
+  .wrap{max-width:860px;margin:0 auto;padding:40px 22px 80px}
+  header{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:30px}
+  h1{font-size:27px;margin:0 0 8px;letter-spacing:.5px}
+  h1 .sub{color:var(--pri);font-weight:400}
+  .lead{color:var(--muted);margin:0}
+  h2{font-size:19px;margin:38px 0 14px;padding-left:11px;border-left:3px solid var(--pri)}
+  h3{font-size:15.5px;margin:22px 0 8px;color:var(--pri2)}
+  p{margin:9px 0}
+  code{background:var(--code);border:1px solid var(--line);border-radius:5px;
+    padding:1px 6px;font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:13px;color:var(--pri2)}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;overflow-x:auto;font-family:ui-monospace,Consolas,monospace;font-size:13px;color:#cfd8e6}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin:14px 0}
+  .card.alt{background:var(--card2)}
+  ol,ul{margin:8px 0;padding-left:22px}
+  li{margin:6px 0}
+  .step{display:flex;gap:14px;align-items:flex-start;margin:14px 0}
+  .num{flex:0 0 30px;height:30px;border-radius:50%;background:var(--pri);color:#1a1206;
+    font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
+  .step .body{flex:1}
+  .step .body b{color:var(--pri2)}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--pri);font-weight:600;background:var(--card2)}
+  .tag{display:inline-block;background:#2a2213;color:var(--pri2);border:1px solid #4a3a1c;
+    border-radius:6px;padding:1px 8px;font-size:12px;margin-right:6px}
+  .ok{color:var(--ok)} .warn{color:var(--warn)}
+  .note{border-left:3px solid var(--pri);background:#1a1710;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+  .note.warn{border-left-color:var(--warn);background:#1c1414}
+  footer{margin-top:46px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>江湖金手指 <span class="sub">· 交付包使用说明</span></h1>
+  <p class="lead">现实任务 → 兑换点 → 武功。把现实中的坚持，练成江湖里的绝学。</p>
+</header>
+
+<h2>一、交付包内容</h2>
+<table>
+  <tr><th>目录</th><th>文件</th><th>说明</th></tr>
+  <tr><td><code>app/</code></td><td><code>江湖金手指.apk</code></td><td>伴侣 App（任务 / 兑换点 / 金手指分配 / Mod 管理）</td></tr>
+  <tr><td><code>mod/</code></td><td><code>诗酒芳华录-金手指版.zip</code></td><td>已注入金手指的《诗酒芳华录》Mod 包（<code>jy_ry.xml</code> + <code>jy_ry_mod</code> + <code>jy_ry_maps</code>）</td></tr>
+  <tr><td><code>game/</code></td><td><code>base-2.apk</code></td><td>游戏本体《群侠传，启动！》（<code>com.jynew.wuxia_launch</code>）</td></tr>
+  <tr><td><code>tools/</code></td><td><code>goldenfinger.lua</code><br><code>inject_mod.py</code><br><code>dump_bundle.py</code></td><td>金手指脚本与注入工具，用于给其它 Mod 注入金手指</td></tr>
+  <tr><td>根目录</td><td><code>使用说明.html</code></td><td>本文件</td></tr>
+</table>
+
+<h2>二、快速上手（四步）</h2>
+
+<div class="step"><div class="num">1</div><div class="body">
+  <b>装游戏</b><br>安装 <code>game/base-2.apk</code>（若已装可跳过）。
+</div></div>
+
+<div class="step"><div class="num">2</div><div class="body">
+  <b>装 Mod</b><br>把 <code>mod/诗酒芳华录-金手指版.zip</code> 解压，得到 <code>jy_ry.xml</code>、<code>jy_ry_mod</code>、<code>jy_ry_maps</code> 三个文件，
+  放进手机的 <code>/storage/emulated/0/jynew/mods/jy_ry/</code> 目录。<br>
+  <span class="muted">若你已经装过《诗酒芳华录》，只需用本包内的 <code>jy_ry_mod</code> 覆盖原文件即可。</span>
+</div></div>
+
+<div class="step"><div class="num">3</div><div class="body">
+  <b>装 App 并授权</b><br>安装 <code>app/江湖金手指.apk</code>，首次打开后在「设置」页点「授予『所有文件访问权限』」。
+  没有这个权限，App 无法读写 Mod 目录和账本。
+</div></div>
+
+<div class="step"><div class="num">4</div><div class="body">
+  <b>开始联动</b><br>在 App「任务」页设定现实任务并完成 → 获得<b>兑换点</b> → 在「金手指」页把兑换点分配到武功，
+  或到「兑换游戏资源」换银两 / 物品 / 历练。然后进入游戏，金手指会在读档时自动兑现。
+</div></div>
+
+<h2>三、App 使用说明</h2>
+
+<h3>任务页</h3>
+<ul>
+  <li><span class="tag">习惯</span>可反复完成，点 ✓ 加分，点 − 撤销并回收兑换点。</li>
+  <li><span class="tag">日常</span>每天只能打卡一次，跨天自动重置。</li>
+  <li><span class="tag">待办</span>一次性任务，完成后置灰。</li>
+  <li><span class="tag">奖励</span>消耗兑换点兑换的「现实奖励」（如看一集电视剧），只扣分不产出。</li>
+  <li>顶部四张卡：<b>兑换点余额 / 已投入武功 / 累计获得 / 累计消耗</b>。</li>
+</ul>
+
+<h3>金手指页</h3>
+<ul>
+  <li>顶部显示<b>可分配兑换点</b>；每门武功按等级曲线消耗兑换点，可随时、分多次投入，不必一次用完。</li>
+  <li>点 <code>+50</code> / <code>+100</code> / <code>全部投入</code> 分配；投入即写入账本，供游戏内读取。</li>
+  <li>武功等级曲线：升到下一级所需兑换点 = <code>100 + (当前等级-1) × 50</code>，最高 10 级。</li>
+</ul>
+
+<h3>兑换游戏资源</h3>
+<ul>
+  <li><code>SILVER</code> 换游戏内银两、<code>ITEM</code> 换物品、<code>EXP</code> 给主角加历练。</li>
+  <li>兑换消耗的是 App 里的<b>兑换点</b>；实际发放发生在游戏内（进入游戏 / 读档时）。</li>
+</ul>
+
+<h3>设置页</h3>
+<ul>
+  <li>显示账本路径、待下发指令数，可「立即导出账本」。</li>
+  <li><b>游戏内进度</b>：显示从游戏存档导出的主角面板（等级 / 气血 / 内力 / 攻击 / 防御 / 银两 / 武功数 / 物品数）。</li>
+</ul>
+
+<h2>四、数据交换原理</h2>
+<p>App 与游戏通过手机存储里的两个文件通信，金手指 Mod 会随游戏自动读写它们：</p>
+
+<table>
+  <tr><th>方向</th><th>文件</th><th>作用</th></tr>
+  <tr><td>App → 游戏</td><td><code>ledger.lua</code></td><td>App 写出的账本（Lua 表）。记录兑换点余额、武功等级、待发放指令。游戏读档时读取并兑现，兑现后自动清空。</td></tr>
+  <tr><td>游戏 → App</td><td><code>state.json</code></td><td>金手指 Mod 把主角「角色面板 + 包裹 + 武功」导出为 JSON，App 在设置页读取展示。</td></tr>
+</table>
+
+<p>两个文件的目录（App 与 Mod 完全一致，两个位置都会写）：</p>
+<pre>/storage/emulated/0/jynew/goldenfinger/
+/storage/emulated/0/Android/data/com.jynew.wuxia_launch/files/goldenfinger/</pre>
+
+<p>账本 <code>ledger.lua</code> 长这样：</p>
+<pre>return {
+  version = 1,
+  points = 100,
+  skills = { { name = "降龙十八掌", category = "外功", level = 3, exp = 250 } },
+  pending = {
+    { kind = "SKILL",  skill = "降龙十八掌", level = 3 },
+    { kind = "SILVER", amount = 1000 },
+    { kind = "ITEM",   item = 123, amount = 1 },
+    { kind = "EXP",    amount = 200 },
+  },
+}</pre>
+
+<h2>五、给其它 Mod 注入金手指</h2>
+<p>金手指需要注入到 Mod 的 <code>hotfix</code> 脚本里（该脚本随 Mod 被游戏预加载）。用 <code>tools/</code> 里的脚本即可：</p>
+<pre># 1) 先看看这个 Mod 包里有没有 hotfix
+python dump_bundle.py &lt;mod包&gt;
+
+# 2) 注入金手指，输出为新文件（原文件不动）
+python inject_mod.py &lt;原始_mod包&gt; &lt;输出_mod包&gt; goldenfinger.lua</pre>
+<p>输出文件名必须与 Mod 清单一致（例如 <code>jy_ry.xml</code> 对应 <code>jy_ry_mod</code>），替换到 <code>/jynew/mods/&lt;modId&gt;/</code> 下即可。</p>
+<div class="note">工具需要 Python 3 与 <code>UnityPy</code>：<code>pip install UnityPy</code></div>
+
+<h2>六、常见问题</h2>
+
+<h3>进游戏后兑换点没到账？</h3>
+<ul>
+  <li>确认 <code>jy_ry_mod</code> 已替换为金手指版（原版没有金手指逻辑）。</li>
+  <li>确认 App 已获得「所有文件访问权限」，且账本已导出（设置页可手动导出）。</li>
+  <li>金手指在<b>读档 / 主角数据初始化</b>时兑现；进游戏读一次档即可。兑现后账本会被清空，属正常现象。</li>
+  <li>兑换点的发放是「读档时结算」：同一批指令只会发放一次。</li>
+</ul>
+
+<h3>「游戏内进度」一直是空的？</h3>
+<ul>
+  <li>需要先进入游戏并读档，Mod 才会写出 <code>state.json</code>；回到 App 设置页点「刷新游戏数据」。</li>
+</ul>
+
+<h3>武功没升到对应等级？</h3>
+<ul>
+  <li>游戏内武功需要先「习得」才能设定等级；若该武功主角尚未学会，金手指会尝试学习它。请以游戏内实际面板为准。</li>
+  <li>游戏版本差异可能导致个别字段名不同，属正常兼容范围。</li>
+</ul>
+
+<div class="note warn"><b>备份提醒：</b>替换 Mod 前建议备份 <code>/jynew/mods/jy_ry/</code> 目录与你的游戏存档，以便随时回退。</div>
+
+<footer>
+  江湖金手指 v1.0 · 伴侣 App + 游戏内 Lua Mod<br>
+  App 包名 <code>com.traework.jygoldenfinger</code> · 游戏包名 <code>com.jynew.wuxia_launch</code>
+</footer>
+
+</div>
+</body>
+</html>

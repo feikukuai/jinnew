@@ -1,0 +1,40 @@
+# ---- 大文件 / 构建产物（不入库）----
+*.apk
+*.aab
+*.zip
+*.jar
+*.mp4
+
+# 注入后的 Mod 包与地图包
+jy_ry_mod*
+jy_ry_maps
+sample_mod_patched
+
+# 构建输出
+android/app/build/
+android/.gradle/
+android/build/
+.gradle/
+build/
+out/
+captures/
+
+# 本机配置
+local.properties
+*.iml
+.idea/
+
+# 调试 / 运行期产物
+*.log
+state*.json
+ledger_phone.lua
+_hotfix_*.lua
+
+# 原始资源与游戏源码（体积过大）
+downloads/
+delivery/
+delivery_build/
+source_ref/
+apk_full/
+apk_probe/sample_mod_extract/
+apk_probe/meta_strings.txt

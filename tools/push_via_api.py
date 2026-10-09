@@ -86,7 +86,7 @@ def collect():
     add(os.path.join(ROOT, "apk_probe", "patch_test.py"), "tools/patch_test.py")
     add(os.path.join(ROOT, "delivery_build", "pack.py"), "tools/pack.py")
 
-    add(os.path.join(ROOT, "delivery_build", "使用说明.html"), "docs/使用说明.html")
+    add(os.path.join(ROOT, "delivery_build", "guide_src.html"), "docs/使用说明.html")
     add(os.path.join(ROOT, "apk_probe", "xlua_api.txt"), "docs/xlua_api.txt")
 
     add(os.path.join(REPO_DIR, "push_via_api.py"), "tools/push_via_api.py")
@@ -133,17 +133,15 @@ def main():
     })
     print("tree = %s" % tree["sha"][:7])
 
-    message = """feat: 江湖金手指 伴侣App + 游戏内Mod 核心代码
+    message = """refactor(ui): 任务页纯任务化，金手指页改为「兑换 / 分配武功」页签
 
-- app/: Android 伴侣 App 源码（任务打卡、兑换点、游戏资源兑换、面板同步）
-- mod/goldenfinger.lua: 注入游戏 Mod hotfix 的 Lua 脚本（读档结算 + 回写 state.json）
-- mod/inject_mod.py: UnityPy 注入工具
-- mod/verify_logic.py: lupa 离线验证结算逻辑
-- tools/: AssetBundle 解析与打包脚本
-- docs/: 使用说明与游戏 Lua 接口清单
-- README: 架构、数据契约、构建与部署说明
-
-大文件（游戏本体、原始/注入后 Mod 包、交付 zip、构建产物）不入库。"""
+- 任务页只保留任务打卡与兑换点余额，兑换入口全部移到金手指页
+- 金手指页顶部固定兑换点余额 + 可折叠「主角状态」卡
+- 金手指页用页签切换「兑换」（秘籍/资源）与「分配武功」，避免秘籍过多把分配区挤到页面底部
+- 秘籍与包裹列表默认只显示前 6 项，支持展开/收起
+- 分区标题统一为强调型样式（左侧竖条 + 分隔线）
+- 破坏性操作增加二次确认；修复设置页版本号与快速上手文案
+- 同步更新使用说明文档"""
     commit = api("POST", "/repos/%s/%s/git/commits" % (OWNER, REPO), {
         "message": message,
         "tree": tree["sha"],

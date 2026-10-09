@@ -19,6 +19,7 @@ import com.traework.jygoldenfinger.game.GameStateReader
 import com.traework.jygoldenfinger.game.LedgerExporter
 import com.traework.jygoldenfinger.game.ModEntry
 import com.traework.jygoldenfinger.game.ModManager
+import com.traework.jygoldenfinger.widget.WidgetUpdater
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -66,6 +67,7 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         val next = block(_state.value)
         _state.value = next
         repo.save(next)
+        WidgetUpdater.updateAll(getApplication())
     }
 
     private fun log(text: String, deltaPoint: Int = 0) =
@@ -427,16 +429,19 @@ class AppViewModel(app: Application) : AndroidViewModel(app) {
         _gameState.value = gs
         syncConsumedCommands()
         // 把游戏内已学会的武功并入本地库，使其可分配兑换点
-        val learned = gs?.player?.wugongs?.map { it.name }?.filter { it.isNotBlank() } ?: return
-        update { st ->
-            val missing = learned.filter { name -> st.martialArts.none { it.name == name } }
-            if (missing.isEmpty()) st
-            else st.copy(
-                martialArts = st.martialArts + missing.map { name ->
-                    MartialArt(id = "gf_$name", name = name, category = "外功")
-                }
-            )
+        val learned = gs?.player?.wugongs?.map { it.name }?.filter { it.isNotBlank() }.orEmpty()
+        if (learned.isNotEmpty()) {
+            update { st ->
+                val missing = learned.filter { name -> st.martialArts.none { it.name == name } }
+                if (missing.isEmpty()) st
+                else st.copy(
+                    martialArts = st.martialArts + missing.map { name ->
+                        MartialArt(id = "gf_$name", name = name, category = "外功")
+                    }
+                )
+            }
         }
+        WidgetUpdater.updateAll(getApplication())
     }
 
     /**

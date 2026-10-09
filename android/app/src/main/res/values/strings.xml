@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">江湖金手指</string>
+
+    <string name="widget_points_label">金手指 · 兑换点</string>
+    <string name="widget_tasks_label">金手指 · 任务</string>
+    <string name="widget_stats_label">金手指 · 角色属性</string>
+    <string name="widget_arts_label">金手指 · 已学武功</string>
+    <string name="widget_items_label">金手指 · 包裹</string>
+
+    <string name="widget_points_desc">显示兑换点余额、累计获得与消耗</string>
+    <string name="widget_tasks_desc">显示任务清单与完成进度</string>
+    <string name="widget_stats_desc">显示主角等级、气血内力与各项属性</string>
+    <string name="widget_arts_desc">显示主角已学会的武功与等级</string>
+    <string name="widget_items_desc">显示包裹中的物品与数量</string>
 </resources>

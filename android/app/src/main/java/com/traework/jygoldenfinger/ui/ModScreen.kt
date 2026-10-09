@@ -30,7 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,13 +42,21 @@ import com.traework.jygoldenfinger.game.GameLauncher
 import com.traework.jygoldenfinger.game.GamePaths
 import com.traework.jygoldenfinger.game.ModEntry
 import com.traework.jygoldenfinger.util.StoragePermission
+import java.util.Locale
 
 @Composable
 fun ModScreen(vm: AppViewModel) {
     val context = LocalContext.current
     val mods by vm.mods.collectAsState()
-    val hasStorage = remember { StoragePermission.hasAllFilesAccess() }
-    val gameInstalled = remember { GameLauncher.isInstalled(context) }
+    var hasStorage by remember { mutableStateOf(StoragePermission.hasAllFilesAccess()) }
+    var gameInstalled by remember { mutableStateOf(GameLauncher.isInstalled(context)) }
+    var pendingRemove by remember { mutableStateOf<ModEntry?>(null) }
+
+    // 用户去系统设置授权、或安装游戏后返回，需要重新读取这些系统状态
+    OnResumeEffect {
+        hasStorage = StoragePermission.hasAllFilesAccess()
+        gameInstalled = GameLauncher.isInstalled(context)
+    }
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -131,7 +141,7 @@ fun ModScreen(vm: AppViewModel) {
             }
 
             items(mods, key = { it.id }) { mod ->
-                ModCard(mod, vm)
+                ModCard(mod) { pendingRemove = mod }
             }
 
             item {
@@ -144,10 +154,22 @@ fun ModScreen(vm: AppViewModel) {
             }
         }
     }
+
+    pendingRemove?.let { mod ->
+        ConfirmDialog(
+            title = "删除 Mod",
+            text = "确定删除《${mod.name}》吗？将移除 ${mod.files.size} 个文件（%.1f MB），此操作不可恢复。"
+                .format(Locale.US, mod.totalBytes / 1024.0 / 1024.0),
+            confirmText = "删除",
+            destructive = true,
+            onDismiss = { pendingRemove = null },
+            onConfirm = { vm.removeMod(mod) }
+        )
+    }
 }
 
 @Composable
-private fun ModCard(mod: ModEntry, vm: AppViewModel) {
+private fun ModCard(mod: ModEntry, onDelete: () -> Unit) {
     Card(
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
@@ -162,7 +184,7 @@ private fun ModCard(mod: ModEntry, vm: AppViewModel) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = { vm.removeMod(mod) }) {
+                IconButton(onClick = onDelete) {
                     Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.outline)
                 }
             }
@@ -175,7 +197,7 @@ private fun ModCard(mod: ModEntry, vm: AppViewModel) {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 AssistChip(onClick = {}, label = { Text("${mod.files.size} 个文件") })
-                AssistChip(onClick = {}, label = { Text("%.1f MB".format(mod.totalBytes / 1024.0 / 1024.0)) })
+                AssistChip(onClick = {}, label = { Text("%.1f MB".format(Locale.US, mod.totalBytes / 1024.0 / 1024.0)) })
             }
         }
     }

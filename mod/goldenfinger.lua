@@ -252,6 +252,78 @@ local function is_book(id)
   return cfg_field(it, "ItemType") == ITEM_TYPE_BOOK
 end
 
+--======================== 介绍 / 属性导出 ========================--
+-- 物品属性字段（键名与 LItemConfig 一致，中文名由 App 映射）
+local ITEM_ATTR_FIELDS = {
+  "AddHp", "AddMaxHp", "AddMp", "AddMaxMp", "Attack", "Qinggong", "Defence",
+  "Heal", "UsePoison", "DePoison", "AntiPoison", "Quanzhang", "Yujian", "Shuadao",
+  "Qimen", "Anqi", "Wuxuechangshi", "AddPinde", "Zuoyouhubo", "AttackPoison",
+  "ChangePoisonLevel", "AddTili"
+}
+
+-- 只导出非零项，减小 state.json 体积
+local function item_attrs_json(it)
+  if it == nil then return "{}" end
+  local parts = {}
+  for _, f in ipairs(ITEM_ATTR_FIELDS) do
+    local v = tonumber(cfg_field(it, f))
+    if v ~= nil and v ~= 0 then
+      parts[#parts + 1] = string.format('"%s":%d', f, v)
+    end
+  end
+  return "{" .. table.concat(parts, ",") .. "}"
+end
+
+-- 兼容 Lua table(1-based) 与 C# IList(0-based) 的序列读取
+local function seq_info(t)
+  if t == nil then return false, 0 end
+  local ok, n = pcall(function() return t.Count end)
+  if ok and type(n) == "number" then return true, n end
+  local ok2, n2 = pcall(function() return #t end)
+  if ok2 and type(n2) == "number" then return false, n2 end
+  return false, 0
+end
+
+local function seq_at(t, zeroBased, i)
+  local idx = zeroBased and i or (i + 1)
+  local ok, v = pcall(function() return t[idx] end)
+  if ok and v ~= nil then return v end
+  if zeroBased then
+    local ok2, v2 = pcall(function() return t:get_Item(i) end)
+    if ok2 then return v2 end
+  end
+  return nil
+end
+
+-- 武功属性：伤害类型 / 攻击范围 / 耗内力 / 带毒 + 各级威力（LSkillConfig）
+local function skill_attrs_json(skillKey)
+  local cfg = nil
+  local t = get_skill_table()
+  if t then
+    local ok, c = pcall(function() return t[skillKey] end)
+    if ok then cfg = c end
+  end
+  if cfg == nil then return "{}" end
+
+  local dt = tonumber(cfg_field(cfg, "DamageType")) or 0
+  local ct = tonumber(cfg_field(cfg, "SkillCoverType")) or 0
+  local mp = tonumber(cfg_field(cfg, "MpCost")) or 0
+  local po = tonumber(cfg_field(cfg, "Poison")) or 0
+
+  local atks = {}
+  local zero, n = seq_info(cfg_field(cfg, "Levels"))
+  for i = 0, n - 1 do
+    local lv = seq_at(cfg_field(cfg, "Levels"), zero, i)
+    if lv ~= nil then
+      atks[#atks + 1] = tostring(tonumber(cfg_field(lv, "Attack")) or 0)
+    end
+  end
+
+  return string.format(
+    '"damageType":%d,"coverType":%d,"mpCost":%d,"poison":%d,"atkByLevel":[%s]',
+    dt, ct, mp, po, table.concat(atks, ","))
+end
+
 --======================== 方向一：App → 游戏 ========================--
 -- 设置武功等级（human level，1..N）。游戏内存储格式：Level = (level-1)*100
 local function set_skill_level(role, skillKey, level)
@@ -395,7 +467,8 @@ local function role_json(r)
     for i = 0, r.Wugongs.Count - 1 do
       local sk = r.Wugongs[i]
       wugongs[#wugongs + 1] = string.format(
-        '{"key":%d,"level":%d,"name":%s}', sk.Key, sk.Level, esc(skill_name(sk.Key)))
+        '{"key":%d,"level":%d,"name":%s,"attrs":{%s}}',
+        sk.Key, sk.Level, esc(skill_name(sk.Key)), skill_attrs_json(sk.Key))
     end
   end)
   -- 背包物品在 GameRuntimeData.Instance.Items（Dictionary<string,(count,time)>），不是 role.Items
@@ -406,9 +479,12 @@ local function role_json(r)
         local id = tonumber(k)
         local cnt = v.Item1
         if id ~= nil and cnt ~= nil and cnt > 0 then
+          local it = item_of(id)
           items[#items + 1] = string.format(
-            '{"itemId":%d,"count":%d,"name":%s,"isBook":%s}',
-            id, cnt, esc(item_name(id)), tostring(is_book(id)))
+            '{"itemId":%d,"count":%d,"name":%s,"isBook":%s,"desc":%s,"itemType":%d,"attrs":%s}',
+            id, cnt, esc(item_name(id)), tostring(is_book(id)),
+            esc(cfg_field(it, "Desc")), tonumber(cfg_field(it, "ItemType")) or 0,
+            item_attrs_json(it))
         end
       end
     end
@@ -451,8 +527,10 @@ local function books_json()
   for _, e in ipairs(list) do
     local needExp = cfg_field(e.it, "NeedExp") or 0
     out[#out + 1] = string.format(
-      '{"itemId":%d,"name":%s,"skillKey":%d,"skillName":%s,"needExp":%d}',
-      e.id, esc(cfg_field(e.it, "Name")), e.skillKey, esc(skill_name(e.skillKey)), needExp)
+      '{"itemId":%d,"name":%s,"skillKey":%d,"skillName":%s,"needExp":%d,' ..
+      '"desc":%s,"attrs":%s,"skillAttrs":{%s}}',
+      e.id, esc(cfg_field(e.it, "Name")), e.skillKey, esc(skill_name(e.skillKey)), needExp,
+      esc(cfg_field(e.it, "Desc")), item_attrs_json(e.it), skill_attrs_json(e.skillKey))
   end
   return table.concat(out, ",")
 end

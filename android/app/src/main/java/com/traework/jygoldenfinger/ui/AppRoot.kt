@@ -41,6 +41,9 @@ fun AppRoot(vm: AppViewModel = viewModel()) {
         }
     }
 
+    // 从游戏切回来时自动同步角色数据，并清掉已被游戏结算的「待下发指令」
+    OnResumeEffect { vm.refreshGameState() }
+
     val items = listOf(
         NavItem("tasks", "任务", Icons.Filled.Checklist),
         NavItem("gf", "金手指", Icons.Filled.AutoFixHigh),

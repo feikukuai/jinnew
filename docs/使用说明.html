@@ -57,14 +57,14 @@
 <h2>一、交付包内容</h2>
 <table>
   <tr><th>目录</th><th>文件</th><th>说明</th></tr>
-  <tr><td><code>app/</code></td><td><code>江湖金手指.apk</code></td><td>伴侣 App（任务 / 兑换点 / 金手指分配 / Mod 管理）</td></tr>
+  <tr><td><code>app/</code></td><td><code>江湖金手指.apk</code></td><td>伴侣 App（任务 / 兑换点 / 金手指分配 / 秘籍兑换 / 详情属性 / 桌面小组件 / Mod 管理）</td></tr>
   <tr><td><code>mod/</code></td><td><code>诗酒芳华录-金手指版.zip</code></td><td>已注入金手指的《诗酒芳华录》Mod 包（<code>jy_ry.xml</code> + <code>jy_ry_mod</code> + <code>jy_ry_maps</code>）</td></tr>
   <tr><td><code>game/</code></td><td><code>base-2.apk</code></td><td>游戏本体《群侠传，启动！》（<code>com.jynew.wuxia_launch</code>）</td></tr>
   <tr><td><code>tools/</code></td><td><code>goldenfinger.lua</code><br><code>inject_mod.py</code><br><code>dump_bundle.py</code></td><td>金手指脚本与注入工具，用于给其它 Mod 注入金手指</td></tr>
   <tr><td>根目录</td><td><code>使用说明.html</code></td><td>本文件</td></tr>
 </table>
 
-<h2>二、快速上手（四步）</h2>
+<h2>二、快速上手（五步）</h2>
 
 <div class="step"><div class="num">1</div><div class="body">
   <b>装游戏</b><br>安装 <code>game/base-2.apk</code>（若已装可跳过）。
@@ -82,47 +82,72 @@
 </div></div>
 
 <div class="step"><div class="num">4</div><div class="body">
-  <b>开始联动</b><br>在 App「任务」页设定现实任务并完成 → 获得<b>兑换点</b> → 在「金手指」页把兑换点分配到武功，
-  或到「兑换游戏资源」换银两 / 物品 / 历练。然后进入游戏，金手指会在读档时自动兑现。
+  <b>进游戏读一次档</b><br>先进入游戏、读取你的存档（任意槽位）。游戏内 Mod 会把该存档的<b>角色面板、包裹、已学武功</b>导出到 App。<br>
+  回到 App「金手指」页点「刷新」，即可看到主角当前的武功与包裹；同页下方会列出可兑换的<b>武功秘籍</b>。
+</div></div>
+
+<div class="step"><div class="num">5</div><div class="body">
+  <b>添加桌面小组件</b><br>长按手机桌面空白处 → 「小组件」→ 找到「江湖金手指」，把需要的组件拖到桌面。
+  共有 <b>兑换点 / 任务 / 角色属性 / 已学武功 / 包裹</b> 五种，点按任一组件即可打开 App。
 </div></div>
 
 <h2>三、App 使用说明</h2>
 
-<h3>任务页</h3>
+<h3>任务页（只做任务，赚兑换点）</h3>
 <ul>
   <li><span class="tag">习惯</span>可反复完成，点 ✓ 加分，点 − 撤销并回收兑换点。</li>
   <li><span class="tag">日常</span>每天只能打卡一次，跨天自动重置。</li>
   <li><span class="tag">待办</span>一次性任务，完成后置灰。</li>
   <li><span class="tag">奖励</span>消耗兑换点兑换的「现实奖励」（如看一集电视剧），只扣分不产出。</li>
-  <li>顶部四张卡：<b>兑换点余额 / 已投入武功 / 累计获得 / 累计消耗</b>。</li>
+  <li>顶部「兑换点余额」卡片紧凑显示余额与累计获得 / 消耗 / 已投入。</li>
+  <li>本页<b>只负责赚取兑换点</b>，不放置兑换入口；赚到的兑换点到「金手指」页花掉。</li>
 </ul>
 
-<h3>金手指页</h3>
+<h3>金手指页（花兑换点）</h3>
+<p>页面顶部固定显示<b>兑换点余额</b>与<b>主角状态</b>卡（可折叠），下方用<b>页签</b>切换「兑换」与「分配武功」两块内容，避免秘籍太多把分配区挤到很下面。</p>
 <ul>
-  <li>顶部显示<b>可分配兑换点</b>；每门武功按等级曲线消耗兑换点，可随时、分多次投入，不必一次用完。</li>
-  <li>点 <code>+50</code> / <code>+100</code> / <code>全部投入</code> 分配；投入即写入账本，供游戏内读取。</li>
+  <li><b>主角状态</b>（游戏内实时同步，可折叠）：显示当前<b>存档槽位</b>、主角名 / 等级、气血内力、银两；点右侧箭头展开后，可查看<b>已学武功（含游戏内等级）</b>与<b>包裹物品</b>（秘籍会标【秘籍】）。点任意条目可查看介绍与属性。默认收起，只显示一行摘要，不占屏幕。</li>
+  <li><b>「兑换」页签</b>：<br>
+    · <b>兑换武功秘籍</b>：直接读取游戏内的真实秘籍目录（<code>ItemType=2</code> 的武功书），兑换后进游戏研读即学会对应武功；已学会的秘籍会显示「已学会」不可重复兑换。带<b>秘籍搜索框</b>，可按秘籍名或武功名筛选；默认只显示前 6 本，可点「展开全部」查看全部。点任意秘籍卡片可查看介绍与属性（秘籍说明、效果加成、所学武功的伤害类型 / 攻击范围 / 消耗内力、威力成长与学习门槛）。<br>
+    · <b>兑换游戏资源</b>：银两、主角历练、神兵 / 物品。</li>
+  <li><b>「分配武功」页签</b>：这里<b>只列出主角已在游戏内学会的武功</b>。未学会的武功不会出现——需先在「兑换」页换取对应秘籍、进游戏研读学会后，才会出现在此列表。每门武功可随时、分多次投入兑换点，不必一次用完；分配后写入账本，进游戏读档即生效。带<b>分类筛选</b>与<b>武功搜索框</b>，可快速定位。</li>
   <li>武功等级曲线：升到下一级所需兑换点 = <code>100 + (当前等级-1) × 50</code>，最高 10 级。</li>
-</ul>
-
-<h3>兑换游戏资源</h3>
-<ul>
-  <li><code>SILVER</code> 换游戏内银两、<code>ITEM</code> 换物品、<code>EXP</code> 给主角加历练。</li>
-  <li>兑换消耗的是 App 里的<b>兑换点</b>；实际发放发生在游戏内（进入游戏 / 读档时）。</li>
 </ul>
 
 <h3>设置页</h3>
 <ul>
+  <li>顶部<b>「快速上手」</b>引导：五步说明安装、读档、做任务、兑换与生效流程。</li>
   <li>显示账本路径、待下发指令数，可「立即导出账本」。</li>
-  <li><b>游戏内进度</b>：显示从游戏存档导出的主角面板（等级 / 气血 / 内力 / 攻击 / 防御 / 银两 / 武功数 / 物品数）。</li>
+  <li><b>游戏内进度</b>：显示从游戏导出的主角面板（含存档槽位），可「刷新游戏数据」。</li>
 </ul>
 
-<h2>四、数据交换原理</h2>
-<p>App 与游戏通过手机存储里的两个文件通信，金手指 Mod 会随游戏自动读写它们：</p>
+<h3>桌面小组件</h3>
+<p>App 提供<b>五种桌面小组件</b>：长按手机桌面空白处 → 「小组件」→ 找到「江湖金手指」，把需要的组件拖到桌面即可；
+  组件可自由调整大小，<b>点按任一组件会打开 App</b>。</p>
+<table>
+  <tr><th>小组件</th><th>显示内容</th></tr>
+  <tr><td>兑换点</td><td>兑换点余额、累计获得 / 消耗、已投入武功、待下发指令数</td></tr>
+  <tr><td>任务</td><td>任务总数与待完成数，按「未完成优先」列出任务（含类型与奖励 / 消耗）</td></tr>
+  <tr><td>角色属性</td><td>主角名 / 等级、存档槽位、银两与历练、气血内力、攻击 / 防御 / 轻功、拳掌 / 御剑 / 耍刀 / 奇门 / 暗器、品德 / 声望 / 资质</td></tr>
+  <tr><td>已学武功</td><td>主角已学会的武功与游戏内等级</td></tr>
+  <tr><td>包裹</td><td>包裹中的物品与数量（秘籍会标注【秘籍】）</td></tr>
+</table>
+<div class="note">小组件在 App 内数据变化、或从游戏切回 App 自动同步时刷新；「角色属性 / 已学武功 / 包裹」需先进入游戏读档才有数据。</div>
+
+<h3>自动同步与误触保护</h3>
+<ul>
+  <li>从游戏切回 App 时会<b>自动刷新</b>角色数据、权限与游戏安装状态，无需手动点刷新。</li>
+  <li>删除任务 / 武功 / Mod、清空指令、重置数据、恢复默认库等<b>危险操作都会二次确认</b>，避免误触丢失数据。</li>
+</ul>
+
+<h2>四、数据交换原理（游戏桥接 Mod 方式）</h2>
+<p>App 与游戏<b>不直接改存档文件</b>，而是通过手机存储里的两个文件通信，金手指 Mod 随游戏自动读写它们。
+  这样不同存档槽位的进度由游戏自己管理，App 只是「读面板、发奖励」。</p>
 
 <table>
   <tr><th>方向</th><th>文件</th><th>作用</th></tr>
-  <tr><td>App → 游戏</td><td><code>ledger.lua</code></td><td>App 写出的账本（Lua 表）。记录兑换点余额、武功等级、待发放指令。游戏读档时读取并兑现，兑现后自动清空。</td></tr>
-  <tr><td>游戏 → App</td><td><code>state.json</code></td><td>金手指 Mod 把主角「角色面板 + 包裹 + 武功」导出为 JSON，App 在设置页读取展示。</td></tr>
+  <tr><td>App → 游戏</td><td><code>ledger.lua</code></td><td>App 写出的账本（Lua 表）：兑换点余额、武功等级、待发放指令。游戏读档时读取并兑现，兑现后自动清空。</td></tr>
+  <tr><td>游戏 → App</td><td><code>state.json</code></td><td>金手指 Mod 导出：<code>archiveIndex</code>（当前存档槽位）、<code>player</code>（角色面板 + 已学武功 <code>wugongs</code> + 包裹 <code>items</code>）、<code>books</code>（武功秘籍目录）、<code>money</code>。</td></tr>
 </table>
 
 <p>两个文件的目录（App 与 Mod 完全一致，两个位置都会写）：</p>
@@ -133,12 +158,11 @@
 <pre>return {
   version = 1,
   points = 100,
-  skills = { { name = "降龙十八掌", category = "外功", level = 3, exp = 250 } },
   pending = {
-    { kind = "SKILL",  skill = "降龙十八掌", level = 3 },
-    { kind = "SILVER", amount = 1000 },
-    { kind = "ITEM",   item = 123, amount = 1 },
-    { kind = "EXP",    amount = 200 },
+    { kind = "SKILL",  skill = "降龙十八掌", level = 300 },  -- 武功等级 ×100
+    { kind = "SILVER", amount = 1000 },                      -- 银两（物品ID=174）
+    { kind = "ITEM",   item = 34, amount = 1 },              -- 秘籍/物品（34=罗汉拳书）
+    { kind = "EXP",    amount = 200 },                       -- 主角历练
   },
 }</pre>
 
@@ -162,21 +186,27 @@ python inject_mod.py &lt;原始_mod包&gt; &lt;输出_mod包&gt; goldenfinger.lu
   <li>兑换点的发放是「读档时结算」：同一批指令只会发放一次。</li>
 </ul>
 
-<h3>「游戏内进度」一直是空的？</h3>
+<h3>「金手指」页看不到可分配的武功？</h3>
 <ul>
-  <li>需要先进入游戏并读档，Mod 才会写出 <code>state.json</code>；回到 App 设置页点「刷新游戏数据」。</li>
+  <li>这里只显示<b>主角已在游戏内学会</b>的武功。请先进入游戏读档，再回 App 点「刷新」。</li>
+  <li>若主角尚未学会任何武功：先到「金手指」页兑换一本<b>武功秘籍</b>，进游戏在包裹里研读学会，再回来刷新。</li>
 </ul>
 
-<h3>武功没升到对应等级？</h3>
+<h3>兑换了秘籍，包裹里没有？</h3>
 <ul>
-  <li>游戏内武功需要先「习得」才能设定等级；若该武功主角尚未学会，金手指会尝试学习它。请以游戏内实际面板为准。</li>
-  <li>游戏版本差异可能导致个别字段名不同，属正常兼容范围。</li>
+  <li>秘籍是通过账本指令在<b>读档时</b>发放的，需先进游戏读一次档。</li>
+  <li>确认兑换的秘籍有合法的游戏物品 ID（秘籍列表由游戏内真实目录提供，正常情况都有效）。</li>
+</ul>
+
+<h3>「游戏内进度」一直是空的？</h3>
+<ul>
+  <li>需要先进入游戏并读档，Mod 才会写出 <code>state.json</code>；回到 App 点「刷新游戏数据」。</li>
 </ul>
 
 <div class="note warn"><b>备份提醒：</b>替换 Mod 前建议备份 <code>/jynew/mods/jy_ry/</code> 目录与你的游戏存档，以便随时回退。</div>
 
 <footer>
-  江湖金手指 v1.0 · 伴侣 App + 游戏内 Lua Mod<br>
+  江湖金手指 v1.3 · 伴侣 App + 游戏内 Lua Mod<br>
   App 包名 <code>com.traework.jygoldenfinger</code> · 游戏包名 <code>com.jynew.wuxia_launch</code>
 </footer>
 

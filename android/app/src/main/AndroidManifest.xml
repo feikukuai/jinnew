@@ -36,6 +36,66 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <receiver
+            android:name=".widget.PointsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_points_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_points_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.TasksWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_tasks_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_tasks_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.StatsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_stats_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_stats_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.ArtsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_arts_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_arts_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.ItemsWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_items_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_items_info" />
+        </receiver>
     </application>
 
 </manifest>

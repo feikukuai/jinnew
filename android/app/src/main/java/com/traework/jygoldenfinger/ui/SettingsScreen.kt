@@ -20,6 +20,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -34,14 +37,21 @@ fun SettingsScreen(vm: AppViewModel) {
     val context = LocalContext.current
     val state by vm.state.collectAsState()
     val gameState by vm.gameState.collectAsState()
-    val hasStorage = StoragePermission.hasAllFilesAccess()
+    var hasStorage by remember { mutableStateOf(StoragePermission.hasAllFilesAccess()) }
+    var confirmReset by remember { mutableStateOf(false) }
+    var confirmClear by remember { mutableStateOf(false) }
     val fmt = SimpleDateFormat("MM-dd HH:mm", Locale.US)
+
+    // 用户去系统设置授权后返回，重新读取权限状态
+    OnResumeEffect { hasStorage = StoragePermission.hasAllFilesAccess() }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 24.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+        item { QuickStartCard() }
+
         item {
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -65,7 +75,7 @@ fun SettingsScreen(vm: AppViewModel) {
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                         ) { Text("立即导出账本", color = MaterialTheme.colorScheme.onPrimary) }
-                        OutlinedButton(onClick = { vm.clearAppliedCommands() }) { Text("清空指令") }
+                        OutlinedButton(onClick = { confirmClear = true }) { Text("清空指令") }
                     }
                     if (!hasStorage) {
                         OutlinedButton(
@@ -164,18 +174,71 @@ fun SettingsScreen(vm: AppViewModel) {
 
         item {
             OutlinedButton(
-                onClick = { vm.resetAll() },
+                onClick = { confirmReset = true },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             ) { Text("重置全部数据") }
         }
 
         item {
             Text(
-                "江湖金手指 v1.0 · 伴侣 App\n现实任务 → 兑换点 → 武功。把现实中的坚持，练成江湖里的绝学。",
+                "江湖金手指 v1.3 · 伴侣 App\n现实任务 → 兑换点 → 武功。把现实中的坚持，练成江湖里的绝学。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 12.dp)
             )
+        }
+    }
+
+    if (confirmClear) {
+        ConfirmDialog(
+            title = "清空待下发指令",
+            text = "将清空当前「待下发指令」队列（共 ${state.commands.size} 条）。若游戏尚未读取这些指令，它们将不会生效。",
+            confirmText = "清空",
+            destructive = true,
+            onDismiss = { confirmClear = false },
+            onConfirm = { vm.clearAppliedCommands() }
+        )
+    }
+
+    if (confirmReset) {
+        ConfirmDialog(
+            title = "重置全部数据",
+            text = "将清空本地全部任务、兑换点、武功分配与待下发指令，恢复到初始状态。此操作不可恢复。",
+            confirmText = "重置",
+            destructive = true,
+            onDismiss = { confirmReset = false },
+            onConfirm = { vm.resetAll() }
+        )
+    }
+}
+
+@Composable
+private fun QuickStartCard() {
+    val steps = listOf(
+        "① 安装并启动游戏：先在「Mod」页授予「所有文件访问权限」，再导入金手指 Mod 压缩包。",
+        "② 进游戏读档：进入游戏并载入任意存档，游戏内 Mod 会把角色面板、包裹、已学武功导出到 App。",
+        "③ 回到 App 设定任务：在「任务」页新增现实目标（习惯/日常/待办/奖励），完成即可赚取兑换点。",
+        "④ 兑换与分配：在「金手指」页兑换武功秘籍或游戏资源，并把兑换点分配给已学会的武功。",
+        "⑤ 生效：再次进游戏读档，账本中的指令即被结算，武功升级、银两与物品到账。"
+    )
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                "快速上手",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            steps.forEach { step ->
+                Text(
+                    step,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
         }
     }
 }

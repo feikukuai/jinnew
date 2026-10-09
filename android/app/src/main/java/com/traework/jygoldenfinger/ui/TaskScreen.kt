@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -45,11 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardOptions
 import com.traework.jygoldenfinger.data.PlayerState
 import com.traework.jygoldenfinger.data.TaskItem
 import com.traework.jygoldenfinger.data.TaskType
-import com.traework.jygoldenfinger.game.GameBook
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -57,9 +56,9 @@ import java.util.Locale
 @Composable
 fun TaskScreen(vm: AppViewModel) {
     val state by vm.state.collectAsState()
-    val gameState by vm.gameState.collectAsState()
     var filter by remember { mutableStateOf<TaskType?>(null) }
     var showAdd by remember { mutableStateOf(false) }
+    var pendingDelete by remember { mutableStateOf<TaskItem?>(null) }
 
     val dayFmt = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US) }
     val today = dayFmt.format(Date())
@@ -89,30 +88,19 @@ fun TaskScreen(vm: AppViewModel) {
             }
 
             items(visible, key = { it.id }) { task ->
-                TaskCard(task, today, vm)
+                TaskCard(task, today, vm) { pendingDelete = task }
             }
 
-            item { SectionHeader("兑换武功秘籍") }
-
-            val books = gameState?.books.orEmpty()
-            if (books.isEmpty()) {
+            if (visible.isNotEmpty()) {
                 item {
                     Text(
-                        "进入游戏读档后，这里会列出可兑换的武功秘籍（读取游戏内真实秘籍目录）。兑换后到游戏包裹中研读即可学会。",
-                        style = MaterialTheme.typography.bodyMedium,
+                        "完成任务赚取兑换点，再到「金手指」页兑换武功秘籍与游戏资源。",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(top = 10.dp)
                     )
                 }
-            } else {
-                val learnedNames = gameState?.player?.wugongs?.map { it.name }?.toSet() ?: emptySet()
-                items(books, key = { "book_${it.itemId}" }) { book ->
-                    BookCard(book, learnedNames, vm)
-                }
             }
-
-            item { SectionHeader("兑换游戏资源") }
-            item { RedeemSection(state, vm) }
         }
 
         ExtendedFloatingActionButton(
@@ -134,18 +122,54 @@ fun TaskScreen(vm: AppViewModel) {
             }
         )
     }
+
+    pendingDelete?.let { task ->
+        ConfirmDialog(
+            title = "删除任务",
+            text = "确定删除「${task.title}」吗？此操作不可恢复。",
+            confirmText = "删除",
+            destructive = true,
+            onDismiss = { pendingDelete = null },
+            onConfirm = { vm.deleteTask(task.id) }
+        )
+    }
 }
 
 @Composable
 private fun HeaderStats(state: PlayerState) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            StatCard("兑换点余额", state.points.toString(), Modifier.weight(1f), accent = true)
-            StatCard("已投入武功", state.pointsInvested.toString(), Modifier.weight(1f))
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            StatCard("累计获得", state.pointsEarnedTotal.toString(), Modifier.weight(1f))
-            StatCard("累计消耗", state.pointsSpentTotal.toString(), Modifier.weight(1f))
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    "兑换点余额",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    state.points.toString(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            Column(horizontalAlignment = Alignment.End, verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                Text(
+                    "累计获得 ${state.pointsEarnedTotal} · 累计消耗 ${state.pointsSpentTotal}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    "已投入武功 ${state.pointsInvested}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
@@ -168,7 +192,7 @@ private fun FilterRow(selected: TaskType?, onSelect: (TaskType?) -> Unit) {
 }
 
 @Composable
-private fun TaskCard(task: TaskItem, today: String, vm: AppViewModel) {
+private fun TaskCard(task: TaskItem, today: String, vm: AppViewModel, onDelete: () -> Unit) {
     val doneToday = task.type == TaskType.DAILY && task.lastDailyDate == today
     val done = task.type == TaskType.TODO && task.todoDone
 
@@ -235,7 +259,7 @@ private fun TaskCard(task: TaskItem, today: String, vm: AppViewModel) {
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
                     ) { Text("兑换") }
                 }
-                IconButton(onClick = { vm.deleteTask(task.id) }) {
+                IconButton(onClick = onDelete) {
                     Icon(Icons.Filled.Delete, contentDescription = "删除", tint = MaterialTheme.colorScheme.outline)
                 }
             }
@@ -257,68 +281,6 @@ private fun TypeBadge(type: TaskType) {
             }
         )
     )
-}
-
-@Composable
-private fun BookCard(book: GameBook, learnedNames: Set<String>, vm: AppViewModel) {
-    val learned = learnedNames.contains(book.skillName)
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(book.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                Text(
-                    if (learned) "已学会「${book.skillName}」" else "研读可学「${book.skillName}」",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Button(
-                onClick = { vm.redeemBook(book) },
-                enabled = !learned,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-            ) { Text(if (learned) "已学会" else "${vm.bookCost(book)} 兑换点") }
-        }
-    }
-}
-
-@Composable
-private fun RedeemSection(state: PlayerState, vm: AppViewModel) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        state.redeemItems.forEach { item ->
-            Card(
-                shape = RoundedCornerShape(14.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(item.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        Text(
-                            when (item.kind) {
-                                "SILVER" -> "游戏内银两 x${item.amount}"
-                                "EXP" -> "主角历练 +${item.amount}"
-                                else -> "游戏物品 x${item.amount}"
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Button(
-                        onClick = { vm.redeem(item) },
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                    ) { Text("${item.pointCost} 兑换点") }
-                }
-            }
-        }
-    }
 }
 
 @Composable

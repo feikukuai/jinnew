@@ -5,19 +5,45 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
 
+/** 武功属性（取自游戏 LSkillConfig） */
+@Serializable
+data class SkillAttrs(
+    /** 0普通 1吸内 2用毒 3解毒 4医疗 */
+    val damageType: Int = 0,
+    /** 0点 1线 2十字 3面 4菱形 */
+    val coverType: Int = 0,
+    /** 消耗内力 */
+    val mpCost: Int = 0,
+    /** 带毒点数 */
+    val poison: Int = 0,
+    /** 各等级威力（下标 0 = 1 级） */
+    val atkByLevel: List<Int> = emptyList()
+) {
+    fun attackAt(level: Int): Int = atkByLevel.getOrNull((level - 1).coerceAtLeast(0)) ?: 0
+}
+
 @Serializable
 data class GameSkill(
     val key: Int = 0,
     val level: Int = 0,
-    val name: String = ""
-)
+    val name: String = "",
+    val attrs: SkillAttrs = SkillAttrs()
+) {
+    /** 人类等级（游戏存储为 (等级-1)*100） */
+    val humanLevel: Int get() = level / 100 + 1
+}
 
 @Serializable
 data class GameItem(
     val itemId: Int = 0,
     val count: Int = 0,
     val name: String = "",
-    val isBook: Boolean = false
+    val isBook: Boolean = false,
+    val desc: String = "",
+    /** 0道具 1装备 2经书 3消耗品 4暗器 */
+    val itemType: Int = 0,
+    /** 效果属性（键名同 LItemConfig，如 Attack/Qinggong） */
+    val attrs: Map<String, Int> = emptyMap()
 )
 
 /** 游戏内「武功秘籍」目录（ItemType==2），用于生成兑换列表 */
@@ -28,7 +54,11 @@ data class GameBook(
     val skillKey: Int = 0,
     val skillName: String = "",
     /** 学习该秘籍所需的历练/悟性门槛，用于推算兑换点价格 */
-    val needExp: Int = 0
+    val needExp: Int = 0,
+    val desc: String = "",
+    val attrs: Map<String, Int> = emptyMap(),
+    /** 研读后可学武功的属性 */
+    val skillAttrs: SkillAttrs = SkillAttrs()
 )
 
 @Serializable
